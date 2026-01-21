@@ -76,14 +76,11 @@ if st.button("Process Files"):
             df_sd = normalize_columns(pd.read_excel(paths["sd.xlsx"]))
             df_sr = normalize_columns(pd.read_excel(paths["sr.xlsx"]))
 
-            # REQUIRED LOGIC:
-            # SD  -> take all rows
-            # SR  -> skip first data row, take from row 2 onwards
+            # FINAL & CORRECT LOGIC:
+            # SD -> all data rows
+            # SR -> all data rows (INCLUDING first data row)
             df_consolidated = pd.concat(
-                [
-                    df_sd,
-                    df_sr.iloc[1:]
-                ],
+                [df_sd, df_sr],
                 ignore_index=True
             )
 
@@ -184,7 +181,7 @@ if st.button("Process Files"):
             )
             summary_df.to_excel(summary_path, index=False)
 
-            # ---------- STORE OUTPUTS (IMPORTANT) ---------- #
+            # ---------- STORE OUTPUTS ---------- #
 
             st.session_state.outputs = {
                 "SD-SR Consolidated": consolidated_path,
@@ -198,10 +195,9 @@ if st.button("Process Files"):
     except Exception as e:
         st.error(str(e))
 
-# ---------------- Downloads (NO RE-RUN ISSUE) ---------------- #
+# ---------------- Downloads ---------------- #
 
 if st.session_state.processed:
-
     st.subheader("Download Outputs")
 
     for label, path in st.session_state.outputs.items():
@@ -212,4 +208,5 @@ if st.session_state.processed:
                 file_name=os.path.basename(path),
                 key=label
             )
+
 
