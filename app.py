@@ -208,4 +208,3 @@ if st.session_state.processed:
                 file_name=os.path.basename(path),
                 key=label   # prevents widget conflict
             )
-
