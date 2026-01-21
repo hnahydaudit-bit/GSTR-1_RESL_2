@@ -76,10 +76,14 @@ if st.button("Process Files"):
             df_sd = normalize_columns(pd.read_excel(paths["sd.xlsx"]))
             df_sr = normalize_columns(pd.read_excel(paths["sr.xlsx"]))
 
-            # EXACT REQUIREMENT:
-            # Consolidated = all SD rows + all SR rows
+            # REQUIRED LOGIC:
+            # SD  -> take all rows
+            # SR  -> skip first data row, take from row 2 onwards
             df_consolidated = pd.concat(
-                [df_sd, df_sr],
+                [
+                    df_sd,
+                    df_sr.iloc[1:]
+                ],
                 ignore_index=True
             )
 
@@ -180,7 +184,7 @@ if st.button("Process Files"):
             )
             summary_df.to_excel(summary_path, index=False)
 
-            # ---------- STORE OUTPUTS (IMPORTANT FIX) ---------- #
+            # ---------- STORE OUTPUTS (IMPORTANT) ---------- #
 
             st.session_state.outputs = {
                 "SD-SR Consolidated": consolidated_path,
@@ -206,5 +210,6 @@ if st.session_state.processed:
                 label=f"Download {label}",
                 data=f,
                 file_name=os.path.basename(path),
-                key=label   # prevents widget conflict
+                key=label
             )
+
