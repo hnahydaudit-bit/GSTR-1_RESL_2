@@ -71,14 +71,29 @@ if st.button("Process Files"):
                     out.write(f.getbuffer())
                 paths[name] = path
 
-            # ---------- SD + SR CONSOLIDATION ---------- #
+            # ---------- SD (normal read) ---------- #
 
-            df_sd = normalize_columns(pd.read_excel(paths["sd.xlsx"]))
-            df_sr = normalize_columns(pd.read_excel(paths["sr.xlsx"]))
+            df_sd = normalize_columns(pd.read_excel(paths["sd.xlsx"], header=0))
 
-            # FINAL & CORRECT LOGIC:
-            # SD -> all data rows
-            # SR -> all data rows (INCLUDING first data row)
+            # ---------- SR (FORCED SAFE READ) ---------- #
+            # Read everything as raw data
+            df_sr_raw = pd.read_excel(paths["sr.xlsx"], header=None)
+
+            # First row is header – extract it
+            sr_headers = (
+                df_sr_raw.iloc[0]
+                .astype(str)
+                .str.strip()
+                .str.replace(r"\s+", " ", regex=True)
+            )
+
+            # Remaining rows are ALL data rows (including first data row)
+            df_sr = df_sr_raw.iloc[1:].copy()
+            df_sr.columns = sr_headers
+            df_sr.reset_index(drop=True, inplace=True)
+
+            # ---------- CONSOLIDATION (GUARANTEED) ---------- #
+
             df_consolidated = pd.concat(
                 [df_sd, df_sr],
                 ignore_index=True
@@ -208,5 +223,6 @@ if st.session_state.processed:
                 file_name=os.path.basename(path),
                 key=label
             )
+
 
 
